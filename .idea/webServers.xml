@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e276212c-c93d-44b4-95e2-41d6517dd382" name="Pi" url="http://192.168.0.105">
+        <fileTransfer host="192.168.0.105" port="22" rootFolder="/home/pi/Desktop/BLEOperator" accessType="SFTP" username="pi">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
