@@ -44,7 +44,7 @@ cd cmake-3.7.1
 make -j4
 sudo make install
 </pre>
-但因為CMake3.1的FindJNI找不到RPi Jessie預設的Java，所以改成CMake搜尋得到的路徑。<br>
+但因為CMake3.7.1的FindJNI找不到RPi Jessie預設的Java，所以改成CMake搜尋得到的路徑。<br>
 <pre>sudo ln -s /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt /usr/lib/jvm/default-java</pre>
 下載Tinyb的函式庫。<br>
 <pre>
