@@ -15,7 +15,7 @@ cd ~
 wget https://www.kernel.org/pub/linux/bluetooth/bluez-5.39.tar.xz
 tar xvf bluez-5.39.tar.xz
 cd bluez-5.39</pre>
-下載bluez5.39補丁。<br>
+下載bluez5.39補丁，然後安裝bluez。<br>
 <pre>
 wget https://gist.github.com/pelwell/c8230c48ea24698527cd/archive/3b07a1eb296862da889609a84f8e10b299b7442d.zip
 unzip 3b07a1eb296862da889609a84f8e10b299b7442d.zip
