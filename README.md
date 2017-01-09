@@ -2,7 +2,7 @@
 測試硬體: Raspberry Pi3 & CC2650<br>
 OS: 2016-11-25-raspbian-jessie<br>
 
-利用RPi3預設藍牙晶片透過tinyb(java版的Bluetooth函式庫)連接Bluetooth裝置，因為tinyb編譯cmake版本需要大於3.1，底層C的藍牙函式庫bluez版本需要大於5.37。駐tinyb亦支援C++<br>
+利用RPi3預設藍牙晶片透過tinyb(java版的Bluetooth函式庫)連接Bluetooth裝置，因為tinyb編譯cmake版本需要大於3.1，底層C的藍牙函式庫bluez版本需要大於5.37。註：tinyb亦支援C++<br>
 
 先安裝bluez需要的函式庫，然後因為RPi3預設的bluez版本為5.23，所以先移除掉。<br>
 <pre>sudo apt-get update
