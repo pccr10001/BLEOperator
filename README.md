@@ -2,7 +2,7 @@
 測試硬體: Raspberry Pi3 & CC2650<br>
 OS: 2016-11-25-raspbian-jessie<br>
 
-利用RPi3預設藍牙晶片透過tinyb(java版的Bluetooth函式庫)連接Bluetooth裝置，因為tinyb編譯cmake版本需要大於3.1，底層C的藍牙函式庫bluez版本需要大於5.37。<br>
+利用RPi3預設藍牙晶片透過tinyb(java版的Bluetooth函式庫)連接Bluetooth裝置，因為tinyb編譯cmake版本需要大於3.1，底層C的藍牙函式庫bluez版本需要大於5.37。駐tinyb亦支援C++<br>
 
 先安裝bluez需要的函式庫，然後因為RPi3預設的bluez版本為5.23，所以先移除掉。<br>
 <pre>sudo apt-get update
@@ -44,9 +44,9 @@ cd cmake-3.7.1
 make -j4
 sudo make install
 </pre>
-但因為CMake3.7.1的FindJNI找不到RPi Jessie預設的Java，所以改成CMake搜尋得到的路徑。<br>
+但因為CMake3.7.1的FindJNI找不到RPi Jessie預設的Java JNI路徑，所以改成CMake搜尋得到的路徑。<br>
 <pre>sudo ln -s /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt /usr/lib/jvm/default-java</pre>
-下載Tinyb的函式庫。<br>
+下載tinyb的函式庫。<br>
 <pre>
 cd ~
 wget https://github.com/intel-iot-devkit/tinyb/archive/0.5.0.tar.gz
@@ -54,7 +54,7 @@ tar xvf 0.5.0.tar.gz
 cd tinyb-0.5.0
 mkdir build
 cd build</pre>
-編譯JAVA版本的tinyb所以加上 -DBUILDJAVA=ON參數。<br>
+編譯Java版本的tinyb所以加上-DBUILDJAVA=ON參數。<br>
 <pre>
 sudo cmake -DBUILDJAVA=ON ..
 sudo make
