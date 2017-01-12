@@ -29,7 +29,7 @@ public class SensorTagTemperatureServiceAdapter extends BLENotificationServiceAd
     }
 
     @Override
-    public boolean init() {
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
         BluetoothGattCharacteristic temperatureConfig = getService().find(CONFIG_UUID);
         BluetoothGattCharacteristic temperaturePeriod = getService().find(PERIOD_UUID);
 
@@ -37,16 +37,16 @@ public class SensorTagTemperatureServiceAdapter extends BLENotificationServiceAd
 
         if (temperatureConfig == null || temperaturePeriod == null) return false;
 
-        temperatureConfig.writeValue(ENABLE_CODE);
-        temperaturePeriod.writeValue(PERIOD_MILLION_SECOND);
+        instance.writeCharacteristic(temperatureConfig, ENABLE_CODE);
+        instance.writeCharacteristic(temperaturePeriod, PERIOD_MILLION_SECOND);
 
-        return true;
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find temperature value characteristic : {}.", characteristic != null);
+        logger.debug("Find temperature value characteristic : {}", characteristic != null);
         return characteristic;
     }
 
@@ -66,7 +66,7 @@ public class SensorTagTemperatureServiceAdapter extends BLENotificationServiceAd
     @Override
     public boolean stop() {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
-        pressureConfig.writeValue(DISABLE_CODE);
+        instance.writeCharacteristic(pressureConfig, DISABLE_CODE);
         return super.stop();
     }
 }

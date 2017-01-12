@@ -29,7 +29,7 @@ public class SensorTagBarometricPressureServiceAdapter extends BLENotificationSe
     }
 
     @Override
-    public boolean init() {
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
         BluetoothGattCharacteristic pressurePeriod = getService().find(PERIOD_UUID);
 
@@ -37,16 +37,16 @@ public class SensorTagBarometricPressureServiceAdapter extends BLENotificationSe
 
         if (pressureConfig == null || pressurePeriod == null) return false;
 
-        pressureConfig.writeValue(ENABLE_CODE);
-        pressurePeriod.writeValue(PERIOD_MILLION_SECOND);
+        instance.writeCharacteristic(pressureConfig, ENABLE_CODE);
+        instance.writeCharacteristic(pressurePeriod, PERIOD_MILLION_SECOND);
 
-        return true;
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find barometric pressure value characteristic : {}.", characteristic != null);
+        logger.debug("Find barometric pressure value characteristic : {}", characteristic != null);
         return characteristic;
     }
 
@@ -66,7 +66,7 @@ public class SensorTagBarometricPressureServiceAdapter extends BLENotificationSe
     @Override
     public boolean stop() {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
-        pressureConfig.writeValue(DISABLE_CODE);
+        instance.writeCharacteristic(pressureConfig, DISABLE_CODE);
         return super.stop();
     }
 }

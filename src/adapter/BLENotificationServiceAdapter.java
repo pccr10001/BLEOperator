@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tinyb.BluetoothGattCharacteristic;
 import tinyb.BluetoothGattService;
-import tinyb.BluetoothNotification;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,25 +11,25 @@ import java.util.List;
 /**
  * Created by IDIC on 2017/1/4.
  */
-public abstract class BLENotificationServiceAdapter<ResultType> implements BLENotificationServiceModel, BLENormalServiceModel<ResultType> {
+public abstract class BLENotificationServiceAdapter<ResultType> {
 
     private static final Logger logger = LogManager.getLogger(BLENotificationServiceAdapter.class);
 
     private boolean isRunning;
     private BluetoothGattService service;
     private List<BLEServiceCallback<ResultType>> callbacks = new LinkedList<>();
+    protected BLEInstance instance;
+    protected BLEServiceCallback<byte[]> innerNotification;
 
     public BLENotificationServiceAdapter(BluetoothGattService service) {
         this.service = service;
+        this.instance = BLEInstance.getInstance();
     }
 
-    @Override
-    public boolean init() {
-        //Enable ble service here.
-        return false;
+    protected boolean init(Callback callback) {
+        callback.operate();
+        return true;
     }
-
-    private BluetoothNotification<byte[]> notification;
 
     protected BluetoothGattCharacteristic getNotificationCharacteristic() {
         //return the characteristic you want to notify here.
@@ -40,37 +39,33 @@ public abstract class BLENotificationServiceAdapter<ResultType> implements BLENo
     public final void run(BLEServiceCallback<ResultType> callback) {
         try {
             isRunning = true;
-            init();
-            start();
             registerListener(callback);
+            init(this::start);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e.getMessage());
             isRunning = false;
         }
     }
 
-    @Override
-    public final boolean start() {
-        notification = bytes -> {
-            for (BLEServiceCallback<ResultType> callback : callbacks) callback.supply(convert(bytes));
+    private boolean start() {
+        innerNotification = data -> {
+            for (BLEServiceCallback<ResultType> callback : callbacks) callback.supply(convert(data));
         };
-        getNotificationCharacteristic().enableValueNotifications(notification);
+        instance.notifyCharacteristic(service.getDevice().getAddress(), getNotificationCharacteristic(), innerNotification);
         return true;
     }
 
-    @Override
     public ResultType convert(byte[] bytes) {
         //convert data here.
         return null;
     }
 
-    @Override
     public boolean stop() {
-        if (notification != null) {
+        if (innerNotification != null) {
             BluetoothGattCharacteristic characteristic = getNotificationCharacteristic();
-            characteristic.disableValueNotifications();
+            instance.disableNotifyCharacteristic(service.getDevice().getAddress(), characteristic, innerNotification);
             logger.debug("Disable notification : " + characteristic.getUUID());
-            notification = null;
             isRunning = false;
             return true;
         }
@@ -91,5 +86,9 @@ public abstract class BLENotificationServiceAdapter<ResultType> implements BLENo
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    protected interface Callback {
+        void operate();
     }
 }

@@ -29,7 +29,7 @@ public class SensorTagOpticalServiceAdapter extends BLENotificationServiceAdapte
     }
 
     @Override
-    public boolean init() {
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
         BluetoothGattCharacteristic opticalConfig = getService().find(CONFIG_UUID);
         BluetoothGattCharacteristic opticalPeriod = getService().find(PERIOD_UUID);
 
@@ -37,16 +37,16 @@ public class SensorTagOpticalServiceAdapter extends BLENotificationServiceAdapte
 
         if (opticalConfig == null || opticalPeriod == null) return false;
 
-        opticalConfig.writeValue(ENABLE_CODE);
-        opticalPeriod.writeValue(PERIOD_MILLION_SECOND);
+        instance.writeCharacteristic(opticalConfig, ENABLE_CODE);
+        instance.writeCharacteristic(opticalPeriod, PERIOD_MILLION_SECOND);
 
-        return true;
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find optical value characteristic : {}.", characteristic != null);
+        logger.debug("Find optical value characteristic : {}", characteristic != null);
         return characteristic;
     }
 
@@ -66,7 +66,7 @@ public class SensorTagOpticalServiceAdapter extends BLENotificationServiceAdapte
     @Override
     public boolean stop() {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
-        pressureConfig.writeValue(DISABLE_CODE);
+        instance.writeCharacteristic(pressureConfig, DISABLE_CODE);
         return super.stop();
     }
 }

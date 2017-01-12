@@ -1,8 +1,10 @@
+import adapter.BLEInstance;
 import adapter.BLENotificationServiceAdapter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import pojo.ExtendedBluetoothDevice;
 import sensortag.*;
-import tinyb.BluetoothDevice;
 import tinyb.BluetoothGattService;
-import tinyb.BluetoothManager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,29 +14,23 @@ import java.util.List;
  */
 public class Main {
 
-    static void printDevice(BluetoothDevice device) {
-        System.out.print("Address = " + device.getAddress());
-        System.out.print(" Name = " + device.getName());
-        System.out.print(" Connected = " + device.getConnected());
-        System.out.println();
-    }
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
 
     public static void main(String[] args) throws InterruptedException {
-        BluetoothManager manager = BluetoothManager.getBluetoothManager();
-        System.out.println(manager.startDiscovery() ? "BLE model start discovering." : "BLE model cannot start discovering.");
-        List<BluetoothDevice> list = manager.getDevices();
-        BluetoothDevice tempDevice = null;
+        BLEInstance instance = BLEInstance.getInstance();
+        System.out.println(instance.startScan() ? "BLE model start discovering." : "BLE model cannot start discovering.");
+        ExtendedBluetoothDevice tempDevice = null;
         List<Task> tasks = new LinkedList<>();
 
         Thread.sleep(2000);
-        for (BluetoothDevice device : list) {
-            printDevice(device);
-            if (device.getName().equals("CC2650 SensorTag") || device.getName().equals("SensorTag 2.0")) {
+        for (ExtendedBluetoothDevice device : instance.attachScanResult().getScanResult()) {
+            if (device.getContent().getName().equals("CC2650 SensorTag") || device.getContent().getName().equals("SensorTag 2.0")) {
                 tempDevice = device;
-                System.out.println(device.connect() ? "SensorTag is connected..." : "SensorTag is not connected...");
-                Thread.sleep(2000);
-                for (BluetoothGattService service : device.getServices()) {
-                    System.out.println("Find service : " + service.getUUID());
+                System.out.println(instance.connectDevice(device.getContent()) ? "SensorTag is connecting..." : "SensorTag is not connecting...");
+                while (!device.getContent().getConnected()){}
+                System.out.println("SensorTag is connected...");
+                for (BluetoothGattService service : device.getContent().getServices()) {
                     if (isAdapterExists(service)) {
                         Task task = new Task(service);
                         tasks.add(task);
@@ -60,8 +56,9 @@ public class Main {
         for (Task task : tasks)
             System.out.printf("BLE Model %s stop : %s\n", task.adapter.getClass().getName(), task.adapter.stop());
         if (tempDevice != null)
-            System.out.println(tempDevice.disconnect() ? "SensorTag is disconnected..." : "SensorTag is not disconnected...");
-        System.out.println(manager.stopDiscovery() ? "BLE model stop discovering." : "BLE model cannot stop discovering.");
+            System.out.println(instance.disconnectDevice(tempDevice.getContent()) ? "SensorTag is disconnected..." : "SensorTag is not disconnected...");
+        System.out.println(instance.stopScan() ? "BLE model stop discovering." : "BLE model cannot stop discovering.");
+        instance.stop();
     }
 
     private static BLENotificationServiceAdapter generateAdapter(BluetoothGattService service) {

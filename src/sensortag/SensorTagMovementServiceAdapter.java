@@ -37,7 +37,7 @@ public class SensorTagMovementServiceAdapter extends BLENotificationServiceAdapt
     private int accelerometerRange = -1;
 
     @Override
-    public boolean init() {
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
         BluetoothGattCharacteristic movementConfig = getService().find(CONFIG_UUID);
         BluetoothGattCharacteristic movementPeriod = getService().find(PERIOD_UUID);
 
@@ -45,44 +45,44 @@ public class SensorTagMovementServiceAdapter extends BLENotificationServiceAdapt
 
         if (movementConfig == null || movementPeriod == null) return false;
 
-        movementConfig.writeValue(ENABLE_CODE);
-        String bits = ByteUtils.bytesToBit(movementConfig.readValue(), 8);
+        instance.writeCharacteristic(movementConfig, ENABLE_CODE);
+        instance.readCharacteristic(movementConfig, data -> {
+            String bits = ByteUtils.bytesToBit(data, 8);
+            int range = ByteUtils.bitToInt("" + bits.charAt(8) + bits.charAt(9));
+            logger.debug("Gyroscope z : {}, Gyroscope y : {}, Gyroscope x : {}," +
+                            " Accelerometer z : {}, Accelerometer y : {}, Accelerometer x : {}," +
+                            " Magnetometer enable : {}, Wake-On-Motion Enable : {}, Accelerometer range : {}",
+                    ByteUtils.bitToBoolean(bits.charAt(0)), ByteUtils.bitToBoolean(bits.charAt(1)), ByteUtils.bitToBoolean(bits.charAt(2)),
+                    ByteUtils.bitToBoolean(bits.charAt(3)), ByteUtils.bitToBoolean(bits.charAt(4)), ByteUtils.bitToBoolean(bits.charAt(5)),
+                    ByteUtils.bitToBoolean(bits.charAt(6)), ByteUtils.bitToBoolean(bits.charAt(7)), range);
 
-        int range = ByteUtils.bitToInt("" + bits.charAt(8) + bits.charAt(9));
-        logger.debug("Gyroscope z : {}, Gyroscope y : {}, Gyroscope x : {}," +
-                        " Accelerometer z : {}, Accelerometer y : {}, Accelerometer x : {}," +
-                        " Magnetometer enable : {}, Wake-On-Motion Enable : {}, Accelerometer range : {}",
-                ByteUtils.bitToBoolean(bits.charAt(0)), ByteUtils.bitToBoolean(bits.charAt(1)), ByteUtils.bitToBoolean(bits.charAt(2)),
-                ByteUtils.bitToBoolean(bits.charAt(3)), ByteUtils.bitToBoolean(bits.charAt(4)), ByteUtils.bitToBoolean(bits.charAt(5)),
-                ByteUtils.bitToBoolean(bits.charAt(6)), ByteUtils.bitToBoolean(bits.charAt(7)), range);
+            switch (range) {
+                case ACCELEROMETER_RANGE_2G:
+                    accelerometerRange = 16384;
+                    break;
+                case ACCELEROMETER_RANGE_4G:
+                    accelerometerRange = 8192;
+                    break;
+                case ACCELEROMETER_RANGE_8G:
+                    accelerometerRange = 4096;
+                    break;
+                case ACCELEROMETER_RANGE_16G:
+                    accelerometerRange = 2048;
+                    break;
+                default:
+                    logger.error("Accelerometer range error : {}", range);
+            }
 
-        switch (range) {
-            case ACCELEROMETER_RANGE_2G:
-                accelerometerRange = 16384;
-                break;
-            case ACCELEROMETER_RANGE_4G:
-                accelerometerRange = 8192;
-                break;
-            case ACCELEROMETER_RANGE_8G:
-                accelerometerRange = 4096;
-                break;
-            case ACCELEROMETER_RANGE_16G:
-                accelerometerRange = 2048;
-                break;
-            default:
-                logger.error("Accelerometer range error : {}", range);
-                return false;
-        }
+            instance.writeCharacteristic(movementPeriod, PERIOD_MILLION_SECOND);
+        });
 
-        movementPeriod.writeValue(PERIOD_MILLION_SECOND);
-
-        return true;
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find movement value characteristic : {}.", characteristic != null);
+        logger.debug("Find movement value characteristic : {}", characteristic != null);
         return characteristic;
     }
 
@@ -100,7 +100,7 @@ public class SensorTagMovementServiceAdapter extends BLENotificationServiceAdapt
     @Override
     public boolean stop() {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
-        pressureConfig.writeValue(DISABLE_CODE);
+        instance.writeCharacteristic(pressureConfig, DISABLE_CODE);
         return super.stop();
     }
 }

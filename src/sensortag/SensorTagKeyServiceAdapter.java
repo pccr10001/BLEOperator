@@ -22,14 +22,14 @@ public class SensorTagKeyServiceAdapter extends BLENotificationServiceAdapter<by
     }
 
     @Override
-    public boolean init() {
-        return true;
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find key value characteristic : {}.", characteristic != null);
+        logger.debug("Find key value characteristic : {}", characteristic != null);
         return characteristic;
     }
 

@@ -29,7 +29,7 @@ public class SensorTagHumidityServiceAdapter extends BLENotificationServiceAdapt
     }
 
     @Override
-    public boolean init() {
+    protected boolean init(BLENotificationServiceAdapter.Callback callback) {
         BluetoothGattCharacteristic humidityConfig = getService().find(CONFIG_UUID);
         BluetoothGattCharacteristic humidityPeriod = getService().find(PERIOD_UUID);
 
@@ -37,16 +37,16 @@ public class SensorTagHumidityServiceAdapter extends BLENotificationServiceAdapt
 
         if (humidityConfig == null || humidityPeriod == null) return false;
 
-        humidityConfig.writeValue(ENABLE_CODE);
-        humidityPeriod.writeValue(PERIOD_MILLION_SECOND);
+        instance.writeCharacteristic(humidityConfig, ENABLE_CODE);
+        instance.writeCharacteristic(humidityPeriod, PERIOD_MILLION_SECOND);
 
-        return true;
+        return super.init(callback);
     }
 
     @Override
     public BluetoothGattCharacteristic getNotificationCharacteristic() {
         BluetoothGattCharacteristic characteristic = getService().find(VALUE_UUID);
-        logger.debug("Find humidity value characteristic : {}.", characteristic != null);
+        logger.debug("Find humidity value characteristic : {}", characteristic != null);
         return characteristic;
     }
 
@@ -66,7 +66,7 @@ public class SensorTagHumidityServiceAdapter extends BLENotificationServiceAdapt
     @Override
     public boolean stop() {
         BluetoothGattCharacteristic pressureConfig = getService().find(CONFIG_UUID);
-        pressureConfig.writeValue(DISABLE_CODE);
+        instance.writeCharacteristic(pressureConfig, DISABLE_CODE);
         return super.stop();
     }
 }
