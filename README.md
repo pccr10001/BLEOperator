@@ -71,6 +71,7 @@ sudo make install</pre>
 /usr/bin/hciattach /dev/ttyAMA0 bcm43xx 921600 noflo
 sudo systemctl restart bluetooth
 sudo hciconfig hci0 up
+rfkill unblock hci0
 </pre>
 參考來源 tinyb : https://github.com/intel-iot-devkit/tinyb<br>
 參考來源 RPi3 Bluez更新 : https://www.raspberrypi.org/forums/viewtopic.php?t=145364&p=1027963
