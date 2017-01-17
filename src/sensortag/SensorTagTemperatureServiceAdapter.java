@@ -8,6 +8,8 @@ import tinyb.BluetoothGattService;
 
 import java.util.Arrays;
 
+import static tool.ByteUtils.shortUnsignedAtOffset;
+
 /**
  * Created by IDIC on 2017/1/5.
  */
@@ -56,8 +58,8 @@ public class SensorTagTemperatureServiceAdapter extends BLENotificationServiceAd
     public double[] convert(byte[] bytes) {
         if (bytes.length != 4) return null;
 
-        double objectTempCelsius = (((bytes[0] & 0xff) | (bytes[1] << 8)) >> 2) * SCALE_LSB;
-        double ambientTempCelsius = (((bytes[2] & 0xff) | (bytes[3] << 8)) >> 2) * SCALE_LSB;
+        double objectTempCelsius = (shortUnsignedAtOffset(bytes, 0) >> 2) * SCALE_LSB;
+        double ambientTempCelsius = (shortUnsignedAtOffset(bytes, 2) >> 2) * SCALE_LSB;
 
         logger.debug("Convert temperature {} to [{}, {}].", Arrays.toString(bytes), objectTempCelsius, ambientTempCelsius);
         return new double[]{objectTempCelsius, ambientTempCelsius};

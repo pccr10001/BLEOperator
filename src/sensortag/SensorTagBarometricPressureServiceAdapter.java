@@ -8,6 +8,8 @@ import tinyb.BluetoothGattService;
 
 import java.util.Arrays;
 
+import static tool.ByteUtils.bit24shortUnsignedAtOffset;
+
 /**
  * Created by IDIC on 2017/1/5.
  */
@@ -56,8 +58,8 @@ public class SensorTagBarometricPressureServiceAdapter extends BLENotificationSe
     public double[] convert(byte[] bytes) {
         if (bytes.length != 6) return null;
 
-        double temperatureValue = ((((bytes[0] & 0xff)) | (((bytes[1] & 0xff) << 8)) | (((bytes[2] & 0xff) << 16))) >> 2) * SCALE_LSB;
-        double pressureValue = ((((bytes[3] & 0xff)) | (((bytes[4] & 0xff) << 8)) | (((bytes[5] & 0xff) << 16))) * 1.0f) / 100.0f;
+        double temperatureValue = (bit24shortUnsignedAtOffset(bytes, 0) >> 2) * 1.0f * SCALE_LSB;
+        double pressureValue = (bit24shortUnsignedAtOffset(bytes, 3) * 1.0f) / 100.0f;
 
         logger.debug("Convert barometric pressure {} to [{}, {}].", Arrays.toString(bytes), temperatureValue, pressureValue);
         return new double[]{pressureValue};

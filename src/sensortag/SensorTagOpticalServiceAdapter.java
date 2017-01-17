@@ -6,7 +6,10 @@ import org.apache.logging.log4j.Logger;
 import tinyb.BluetoothGattCharacteristic;
 import tinyb.BluetoothGattService;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+
+import static tool.ByteUtils.shortUnsignedAtOffset;
 
 /**
  * Created by IDIC on 2017/1/5.
@@ -54,10 +57,10 @@ public class SensorTagOpticalServiceAdapter extends BLENotificationServiceAdapte
     public double[] convert(byte[] bytes) {
         if (bytes.length != 2) return null;
 
-        int integer = (((bytes[0] & 0xff)) | (((bytes[1] & 0xff) << 8)));
-        float e =  integer & 0x0FFF;
-        float m = (integer & 0xF000) >>12;
-        double value = m * (0.01 * Math.pow(2.0, e));
+        int integer = shortUnsignedAtOffset(bytes, 0);
+        float e = integer & 0x0FFF;
+        float m = (integer & 0xF000) >> 12;
+        double value = new BigDecimal(2).pow((int) e).multiply(new BigDecimal(0.01)).multiply(new BigDecimal(m)).doubleValue();
         logger.debug("Convert optical {} to [{}, {}, {}].", Arrays.toString(bytes), e, m, value);
 
         return new double[]{value};

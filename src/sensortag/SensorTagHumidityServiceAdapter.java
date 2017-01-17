@@ -8,6 +8,8 @@ import tinyb.BluetoothGattService;
 
 import java.util.Arrays;
 
+import static tool.ByteUtils.shortUnsignedAtOffset;
+
 /**
  * Created by IDIC on 2017/1/5.
  */
@@ -50,14 +52,13 @@ public class SensorTagHumidityServiceAdapter extends BLENotificationServiceAdapt
         return characteristic;
     }
 
-    private static final float SCALE_LSB = 0.03125f;
-
     @Override
     public double[] convert(byte[] bytes) {
         if (bytes.length != 4) return null;
 
-        double temperatureCelsius = ((((bytes[0] & 0xff)) | (((bytes[1] & 0xff) << 8))) >> 2) * SCALE_LSB;
-        double relativeHumidity  = ((((bytes[2] & 0xff)) | (((bytes[3] & 0xff) << 8))) / 65536) * 100;
+        double temperatureCelsius = ((shortUnsignedAtOffset(bytes, 0) * 1.0f) / 65536) * 165 - 40;
+
+        double relativeHumidity = (shortUnsignedAtOffset(bytes, 2) * 1.0f / 65536) * 100;
 
         logger.debug("Convert humidity {} to [{}, {}].", Arrays.toString(bytes), temperatureCelsius, relativeHumidity);
         return new double[]{temperatureCelsius, relativeHumidity};

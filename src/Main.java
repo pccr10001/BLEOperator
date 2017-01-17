@@ -1,7 +1,5 @@
 import adapter.BLEInstance;
 import adapter.BLENotificationServiceAdapter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import pojo.ExtendedBluetoothDevice;
 import sensortag.*;
 import tinyb.BluetoothGattService;
@@ -13,9 +11,6 @@ import java.util.List;
  * Created by IDIC on 2016/12/9.
  */
 public class Main {
-
-    private static final Logger logger = LogManager.getLogger(Main.class);
-
 
     public static void main(String[] args) throws InterruptedException {
         BLEInstance instance = BLEInstance.getInstance();
@@ -30,6 +25,7 @@ public class Main {
                 System.out.println(instance.connectDevice(device.getContent()) ? "SensorTag is connecting..." : "SensorTag is not connecting...");
                 while (!device.getContent().getConnected()){}
                 System.out.println("SensorTag is connected...");
+                Thread.sleep(2000);
                 for (BluetoothGattService service : device.getContent().getServices()) {
                     if (isAdapterExists(service)) {
                         Task task = new Task(service);

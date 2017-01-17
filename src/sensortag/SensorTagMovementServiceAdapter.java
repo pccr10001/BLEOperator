@@ -9,6 +9,8 @@ import tool.ByteUtils;
 
 import java.util.Arrays;
 
+import static tool.ByteUtils.shortUnsignedAtOffset;
+
 /**
  * Created by IDIC on 2017/1/5.
  */
@@ -90,11 +92,27 @@ public class SensorTagMovementServiceAdapter extends BLENotificationServiceAdapt
     public double[] convert(byte[] bytes) {
         if (bytes.length != 18) return null;
 
-        double gyroscopeValue = (ByteUtils.bytesToLong(Arrays.copyOfRange(bytes, 0, 6)) * 1.0f) / (65536 / 500);
-        double accelerometerValue = (ByteUtils.bytesToLong(Arrays.copyOfRange(bytes, 6, 12)) * 1.0f) / accelerometerRange;
+        final float GYROSCOPE_SCALE = (float) (65536 / 500);
+        double gyroscopeX = (shortUnsignedAtOffset(bytes, 0) * 1.0f) / GYROSCOPE_SCALE;
+        double gyroscopeY = (shortUnsignedAtOffset(bytes, 2) * 1.0f) / GYROSCOPE_SCALE;
+        double gyroscopeZ = (shortUnsignedAtOffset(bytes, 2) * 1.0f) / GYROSCOPE_SCALE;
 
-        logger.debug("Convert movement {} to [{}, {}].", Arrays.toString(bytes), gyroscopeValue, accelerometerValue);
-        return new double[]{gyroscopeValue, accelerometerValue};
+        double accelerometerX = -(shortUnsignedAtOffset(bytes, 6) * 1.0f) / accelerometerRange;
+        double accelerometerY = (shortUnsignedAtOffset(bytes, 8) * 1.0f) / accelerometerRange;
+        double accelerometerZ = -(shortUnsignedAtOffset(bytes, 10) * 1.0f) / accelerometerRange;
+
+        final float MAGNETOMETER_SCALE = (float) (32768 / 4912);
+        double magnetometerX = (shortUnsignedAtOffset(bytes, 12) * 1.0f);
+        double magnetometerY = (shortUnsignedAtOffset(bytes, 14) * 1.0f);
+        double magnetometerZ = (shortUnsignedAtOffset(bytes, 16) * 1.0f);
+
+        logger.debug("Convert movement {} to [{}, {}, {}].", Arrays.toString(bytes),
+                new double[]{gyroscopeX, gyroscopeY, gyroscopeZ},
+                new double[]{accelerometerX, accelerometerY, accelerometerZ},
+                new double[]{magnetometerX, magnetometerY, magnetometerZ});
+        return new double[]{gyroscopeX, gyroscopeY, gyroscopeZ,
+                accelerometerX, accelerometerY, accelerometerZ,
+                magnetometerX, magnetometerY, magnetometerZ};
     }
 
     @Override

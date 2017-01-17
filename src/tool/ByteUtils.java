@@ -25,4 +25,17 @@ public class ByteUtils {
         return value;
     }
 
+    public static Integer shortUnsignedAtOffset(byte[] bytes, int offset) {
+        Integer lowerByte = (int) bytes[offset] & 0xFF;
+        Integer upperByte = (int) bytes[offset + 1] & 0xFF; // // Interpret MSB as signed
+        return (upperByte << 8) + lowerByte;
+    }
+
+    public static Integer bit24shortUnsignedAtOffset(byte[] bytes, int offset) {
+        Integer lowerByte = (int) bytes[offset] & 0xFF;
+        Integer middleByte = (int) bytes[offset + 1] & 0xFF; // // Interpret MSB as signed
+        Integer upperByte = (int) bytes[offset + 2] & 0xFF;
+        return (upperByte << 16) + (middleByte << 8) + lowerByte;
+    }
+
 }
