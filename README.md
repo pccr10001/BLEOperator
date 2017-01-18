@@ -73,5 +73,9 @@ sudo systemctl restart bluetooth
 sudo hciconfig hci0 up
 rfkill unblock hci0
 </pre>
+編譯java時，要加入底層函式庫的位置參數。<br>
+<pre>
+-Djava.library.path="/usr/local/lib/"
+</pre>
 參考來源 tinyb : https://github.com/intel-iot-devkit/tinyb<br>
 參考來源 RPi3 Bluez更新 : https://www.raspberrypi.org/forums/viewtopic.php?t=145364&p=1027963
