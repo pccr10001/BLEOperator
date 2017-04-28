@@ -60,7 +60,7 @@ sudo cmake -DBUILDJAVA=ON ..
 sudo make
 sudo make install</pre>
 其他藍牙設定，修改/etc/dbus-1/system.d/bluetooth.conf，在&lt;policy context="default"&gt;加入。<br>
-<pre>&lt;llow send_interface="org.bluez.GattService1"/&gt;
+<pre>&lt;allow send_interface="org.bluez.GattService1"/&gt;
 &lt;allow send_interface="org.bluez.GattCharacteristic1"/&gt;
 &lt;allow send_interface="org.bluez.GattDescriptor1"/&gt;
 </pre>
